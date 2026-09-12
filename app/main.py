@@ -26,7 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.chiban import Chiban
-from app.codes import LIQ_OUT_OF_SCOPE_NOTE
+from app.codes import LIQ_OUT_OF_SCOPE_NOTE, liq_rank, shindo_kaikyu
 from app.lookup import Index
 
 PORT = int(os.environ.get("KJISHIN_PORT", "18353"))
@@ -175,6 +175,62 @@ def api_check(q: str = "", lat: float = None, lon: float = None):
     }
 
 
+@app.get("/api/mesh.geojson")
+def mesh_geojson(bbox: str = "", layer: str = "shindo", limit: int = 6000):
+    """表示範囲のメッシュを GeoJSON で返す。bbox は minlon,minlat,maxlon,maxlat。
+
+    メッシュは緯度経度に平行な矩形なので、保存してある四隅から組み立てる。
+    ポリゴンを持たない分、DBが小さく引くのも速い。
+    """
+    try:
+        minx, miny, maxx, maxy = [float(v) for v in bbox.split(",")]
+    except ValueError:
+        return JSONResponse({"error": "bbox は minlon,minlat,maxlon,maxlat の形で渡してください"}, status_code=400)
+    if INDEX._conn is None:
+        INDEX.load()
+    cur = INDEX._conn.execute(
+        """SELECT m.code, m.minx, m.miny, m.maxx, m.maxy, m.i_s, m.pl
+           FROM mesh_rtree t JOIN rtree_map r ON r.id = t.id JOIN mesh m ON m.code = r.code
+           WHERE t.maxx >= ? AND t.minx <= ? AND t.maxy >= ? AND t.miny <= ?
+           LIMIT ?""", (minx, maxx, miny, maxy, int(limit)))
+    feats = []
+    for r in cur:
+        i_s, pl = r["i_s"], r["pl"]
+        # 塗り分け用の段階。液状化は負を「判定対象外」として別扱いにする（0と混ぜない）
+        if layer == "ekijoka":
+            cls = -1 if pl < 0 else (0 if pl == 0 else 1 if pl <= 5 else 2 if pl <= 15 else 3)
+            label = liq_rank(pl)[0]
+        else:
+            cls = 0 if i_s < 5.5 else 1 if i_s < 6.0 else 2 if i_s < 6.5 else 3
+            label = shindo_kaikyu(i_s)
+        feats.append({
+            "type": "Feature",
+            "geometry": {"type": "Polygon", "coordinates": [[
+                [r["minx"], r["miny"]], [r["maxx"], r["miny"]],
+                [r["maxx"], r["maxy"]], [r["minx"], r["maxy"]], [r["minx"], r["miny"]]]]},
+            "properties": {"cls": cls, "label": label,
+                           "i_s": round(i_s, 2), "pl": (None if pl < 0 else round(pl, 1))},
+        })
+    return {"type": "FeatureCollection", "features": feats, "truncated": len(feats) >= limit}
+
+
+@app.get("/map/", response_class=HTMLResponse)
+def map_page(request: Request, lat: float = None, lon: float = None, q: str = ""):
+    if q.strip() and lat is None:
+        hit = CHIBAN.find(q.strip())
+        if hit:
+            minx, miny, maxx, maxy = hit[0].bounds
+            lat, lon = (miny + maxy) / 2, (minx + maxx) / 2
+        else:
+            try:
+                found = geocode(q.strip())
+                if found:
+                    lat, lon = found[0], found[1]
+            except requests.RequestException:
+                pass
+    return page(request, "map.html", lat=lat, lon=lon, q=q[:100])
+
+
 @app.get("/healthz")
 def healthz():
     return {"ok": True, "mesh": INDEX.count, "parcels": CHIBAN.count, "vintage": INDEX.vintage}
@@ -193,7 +249,7 @@ def robots():
 @app.get("/sitemap.xml")
 def sitemap():
     urls = "".join(f"<url><loc>{PUBLIC_BASE}{p}</loc><changefreq>monthly</changefreq></url>"
-                   for p in ("/", "/about"))
+                   for p in ("/", "/map/", "/about"))
     return Response(content=f'<?xml version="1.0" encoding="UTF-8"?>'
                             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
                     media_type="application/xml")
@@ -224,7 +280,7 @@ def llms():
 
 ## 使い方
 - 住所で調べる: {PUBLIC_BASE}/?q=<住所>
-- 地番で調べる: {PUBLIC_BASE}/?q=<区名+町丁目+地番>
+- 地番で調べる: {PUBLIC_BASE}/?q=<区名+町丁目+地番>\n- 地図で見る: {PUBLIC_BASE}/map/
 - API: {PUBLIC_BASE}/api/check?q=<住所>
 - MCP: 同梱の kjishin_mcp.py を AIエージェントに登録すると、住所判定をツールとして呼べる
 

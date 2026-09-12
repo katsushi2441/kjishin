@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}地図で見る｜{{ site }}{% endblock %}
+{% block desc %}南海トラフ地震（最大クラス）で名古屋市に想定される震度と液状化の危険度を、地図で見られます。クリックするとその地点を判定します。{% endblock %}
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+<style>
+.maprow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:14px}
+@media(max-width:820px){.maprow{grid-template-columns:minmax(0,1fr)}}
+#map{height:min(70vh,620px);border-radius:12px;border:1px solid var(--line);min-width:0}
+.side{min-width:0}
+.layerbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.layerbar button{padding:8px 14px;font-size:13.5px;border-radius:99px;border:1px solid #bfe3de;
+  background:#fff;color:var(--teal-deep);font-weight:700;cursor:pointer}
+.layerbar button.on{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#fff;border-color:transparent}
+.legend{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:10px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+.legend div{margin:3px 0}
+.hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+</style>
+{% endblock %}
+{% block body %}
+<h1>地図で見る</h1>
+<p class="muted">南海トラフ地震（最大クラス）の想定です。<b>地図をクリック</b>するとその地点を判定します。
+拡大するとメッシュ（約50m）が出ます。</p>
+
+<div class="layerbar">
+  <button id="b-shindo" class="on" type="button">想定震度</button>
+  <button id="b-ekijoka" type="button">液状化</button>
+</div>
+
+<div class="maprow">
+  <div id="map"></div>
+  <div class="side">
+    <div class="card" id="result" style="margin:0">
+      <p class="muted" style="margin:0">地図をクリックすると、ここに判定が出ます。</p>
+    </div>
+    <div class="note" id="zoomhint" hidden style="margin-top:10px">
+      もう少し<b>拡大</b>すると、メッシュ（約50m）が表示されます。</div>
+    <div class="note" id="trunchint" hidden style="margin-top:10px">
+      この範囲はメッシュが多すぎて<b>一部しか表示していません</b>。拡大すると全部出ます。</div>
+    <div class="legend" id="legend"></div>
+    <p class="hint">背景地図: 国土地理院 淡色地図</p>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<form class="search" method="get" action="./">
+  <input type="text" name="q" value="{{ q }}" placeholder="住所か地番で移動（例: 中村区名駅一丁目1015-14）">
+  <button type="submit">移動</button>
+</form>
+</div>
+
+<script>
+var BASE = '{{ root }}';
+var LAYER = 'shindo';
+var SHINDO_COLORS = ['#ffe9a8','#ffc470','#f08a3c','#c0392b'];
+var SHINDO_LABELS = ['震度5強以下','震度6弱','震度6強','震度7'];
+var EKI_COLORS = ['#e3e8ea','#dff0e8','#9fd8b4','#f0c419','#c0392b'];
+var EKI_LABELS = ['判定対象外','危険度なし(PL=0)','低い(PL≦5)','高い(PL≦15)','極めて高い(PL>15)'];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+var map = new maplibregl.Map({
+  container:'map',
+  style:{version:8,
+    sources:{gsi:{type:'raster',tiles:['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
+      tileSize:256,attribution:'国土地理院'}},
+    layers:[{id:'gsi',type:'raster',source:'gsi'}]},
+  center:[{{ lon or 136.9066 }},{{ lat or 35.1815 }}], zoom:{{ 15 if lat else 13 }}
+});
+map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+
+function paint(){
+  // 震度は4段階、液状化は「判定対象外(-1)」を別の色にして0と混ぜない
+  return LAYER === 'shindo'
+    ? ['match',['get','cls'],0,SHINDO_COLORS[0],1,SHINDO_COLORS[1],2,SHINDO_COLORS[2],3,SHINDO_COLORS[3],'#ccc']
+    : ['match',['get','cls'],-1,EKI_COLORS[0],0,EKI_COLORS[1],1,EKI_COLORS[2],2,EKI_COLORS[3],3,EKI_COLORS[4],'#ccc'];
+}
+function legend(){
+  var cs = LAYER==='shindo'?SHINDO_COLORS:EKI_COLORS, ls = LAYER==='shindo'?SHINDO_LABELS:EKI_LABELS, h='';
+  h += '<b>'+(LAYER==='shindo'?'想定される震度':'液状化の危険度')+'</b>';
+  for(var i=0;i<cs.length;i++){h+='<div><i style="background:'+cs[i]+'"></i>'+esc(ls[i])+'</div>';}
+  if(LAYER!=='shindo'){h+='<div class="muted" style="margin-top:6px">「判定対象外」は<b>「液状化しない」ではありません</b>。判定の対象に入っていないという意味です。</div>';}
+  document.getElementById('legend').innerHTML = h;
+}
+
+var loading=false;
+function loadMesh(){
+  // zoom12 は 18,304メッシュあり、上限6,000で打ち切られて虫食いに見える（実測）。
+  // zoom13 なら 4,655件で全部入るので、そこを下限にする。
+  if(loading || map.getZoom() < 13){document.getElementById('zoomhint').hidden = false; return;}
+  document.getElementById('zoomhint').hidden = true;
+  loading=true;
+  var b=map.getBounds();
+  fetch(BASE+'api/mesh.geojson?layer='+LAYER+'&bbox='+[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()].join(','))
+    .then(function(r){return r.json()})
+    .then(function(j){
+      if(j.features && map.getSource('mesh')){map.getSource('mesh').setData(j);}
+      // 打ち切られたら黙って欠けた地図を見せない。件数が多すぎると伝える
+      document.getElementById('trunchint').hidden = !j.truncated;
+    })
+    .catch(function(){})
+    .then(function(){loading=false;});
+}
+map.on('load',function(){
+  map.addSource('mesh',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  map.addLayer({id:'mesh',type:'fill',source:'mesh',paint:{'fill-color':paint(),'fill-opacity':0.55}});
+  legend(); loadMesh();
+  {% if lat and lon %}judge({{ lat }},{{ lon }});{% endif %}
+});
+map.on('moveend',loadMesh);
+map.on('zoomend',function(){
+  if(map.getZoom()<13 && map.getSource('mesh')){map.getSource('mesh').setData({type:'FeatureCollection',features:[]});}
+  loadMesh();
+});
+
+function setLayer(n){
+  LAYER=n;
+  document.getElementById('b-shindo').className = n==='shindo'?'on':'';
+  document.getElementById('b-ekijoka').className = n==='ekijoka'?'on':'';
+  if(map.getLayer('mesh')){map.setPaintProperty('mesh','fill-color',paint());}
+  legend(); loadMesh();
+}
+document.getElementById('b-shindo').onclick=function(){setLayer('shindo')};
+document.getElementById('b-ekijoka').onclick=function(){setLayer('ekijoka')};
+
+var marker=null;
+function judge(lat,lon){
+  fetch(BASE+'api/check?lat='+lat+'&lon='+lon).then(function(r){return r.json()}).then(function(j){
+    var h='';
+    if(j.status==='inside'){
+      h='<div style="font-weight:800;color:#c0392b;margin-bottom:8px">'+esc(j.shindo)+'／'+esc(j.liquefaction)+'</div><table>'
+       +'<tr><th>想定される震度</th><td><b>'+esc(j.shindo)+'</b><br><span class="muted">計測震度 '
+       + (j.shindo_i_min===j.shindo_i_max ? esc(j.shindo_i_max.toFixed(2)) : esc(j.shindo_i_min.toFixed(2))+'〜'+esc(j.shindo_i_max.toFixed(2)))
+       +'</span></td></tr>'
+       +'<tr><th>液状化</th><td><b>'+esc(j.liquefaction)+'</b>'+(j.pl!=null?'<br><span class="muted">PL値 '+esc(j.pl.toFixed(1))+'</span>':'')+'</td></tr>'
+       + (j.parcel?'<tr><th>地番</th><td>'+esc(j.parcel)+'<br><span class="muted">筆にかかる '+esc(j.parcel_cells)+' メッシュ</span></td></tr>':'')
+       +'</table>';
+      if(j.shindo_meaning){h+='<div class="note">'+esc(j.shindo_meaning)+'</div>';}
+      (j.notes||[]).slice(0,2).forEach(function(t){h+='<div class="note">'+esc(t.replace(/\*\*/g,''))+'</div>';});
+    }else{
+      h='<div style="font-weight:800;margin-bottom:6px">名古屋市の範囲外です</div>'
+       +'<div class="muted">'+(j.notes||[]).map(esc).join('<br>')+'</div>';
+    }
+    document.getElementById('result').innerHTML=h;
+    if(marker)marker.remove();
+    marker=new maplibregl.Marker({color:'#0a9a8f'}).setLngLat([lon,lat]).addTo(map);
+  });
+}
+map.on('click',function(e){judge(+e.lngLat.lat.toFixed(6),+e.lngLat.lng.toFixed(6))});
+</script>
+{% endblock %}
