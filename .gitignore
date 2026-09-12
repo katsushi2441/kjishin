@@ -5,3 +5,12 @@ outputs/
 __pycache__/
 *.pyc
 .env
+
+# 秘密・バックアップ・再生成できるデータ
+.env.*
+*.env
+*.env.bak*
+*.bak
+*.bak-*
+data/raw/
+data/tiles/
