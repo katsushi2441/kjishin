@@ -42,6 +42,8 @@ INDEX = Index()
 CHIBAN = Chiban()
 
 LINKS = {
+    # 買い切り版の商品ページ。デモから商品へ必ず導線を張る（全製品そろえる）
+    "kappstore": "https://kappstore.exbridge.jp/app.php?id=51649180bea0fd57&ref=kjishin",
     "kfault": "https://kurage.exbridge.jp/kfault.php/",
     "kflood": "https://kurage.exbridge.jp/kflood.php/",
     "khazard": "https://kurage.exbridge.jp/khazard.php/",
@@ -277,6 +279,11 @@ def llms():
 - **液状化の「判定対象外」は「液状化しない」ではない。** 判定の対象に入っていないという意味で、
   名古屋市東部の台地に多い。危険度なし（PL=0）とは必ず分けて表示する。
 - 地番で調べると、代表点1点ではなく**筆の形**で判定し、筆にかかるメッシュの幅で返す。
+
+
+## 買い切り版
+- 商品ページ: https://kappstore.exbridge.jp/app.php?id=51649180bea0fd57
+- 税込55,000円。ソースコード（MIT）・データ取り込みスクリプト・設置手順書を同梱。自社サーバーで動かせる。
 
 ## 使い方
 - 住所で調べる: {PUBLIC_BASE}/?q=<住所>
