@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>南海トラフ地震で、<br>そこは何震度で、液状化しますか。</h1>
+<p class="muted">名古屋市が公表した被害想定（最大クラス）にもとづいて、住所または地番から判定します。
+{{ "{:,}".format(count) }}メッシュ（約50m）と{{ "{:,}".format(chiban_count) }}筆を収録。</p>
+
+<div class="card">
+  <form class="search" method="get" action="./">
+    <input type="text" name="q" value="{{ q }}" placeholder="例: 中村区名駅一丁目1015-14　／　名古屋市港区港明1丁目" autofocus>
+    <button type="submit">調べる</button>
+  </form>
+  <p class="muted" style="margin:10px 0 0"><b>地番まで入れると精度が上がります。</b>
+    土地の区画（筆）の形で判定し、敷地にかかる範囲で答えます。町丁名は漢数字でも算用数字でも構いません。</p>
+</div>
+
+{% if error %}<div class="card"><p style="color:var(--warn);font-weight:700">{{ error }}</p></div>{% endif %}
+
+{% if result %}
+  {% if result.status == 'inside' %}
+    <div class="card hit">
+    <h2 style="border:0;margin-top:0">{{ result.shindo_label }}／{{ result.liq_label }}</h2>
+    <p>{{ result.address }}{% if result.parcel %}（地番 {{ result.parcel }}）{% endif %}</p>
+    <table>
+      <tr><th>想定される震度</th><td><b>{{ result.shindo_label }}</b>
+        <span class="muted">（計測震度 {{ "%.2f"|format(result.shindo_min) }}{% if result.shindo_min != result.shindo_max %}〜{{ "%.2f"|format(result.shindo_max) }}{% endif %}）</span></td></tr>
+      {% if result.shindo_meaning %}
+      <tr><th>その震度で起きること</th><td>{{ result.shindo_meaning }}</td></tr>
+      {% endif %}
+      <tr><th>液状化</th><td><b>{{ result.liq_label }}</b>
+        {% if result.liq_pl is not none %}<span class="muted">（PL値 {{ "%.1f"|format(result.liq_pl) }}）</span>{% endif %}</td></tr>
+      {% if result.settle_max %}
+      <tr><th>想定される沈下量</th><td>{{ "%.2f"|format(result.settle_max) }} m</td></tr>
+      {% endif %}
+      {% if result.parcel_cells %}
+      <tr><th>調べた範囲</th><td>土地の区画（筆）にかかる <b>{{ result.parcel_cells }}</b> メッシュ</td></tr>
+      {% else %}
+      <tr><th>調べた範囲</th><td>住所の代表点が乗るメッシュ1つ</td></tr>
+      {% endif %}
+    </table>
+    {% for n in result.notes %}<div class="note">{{ n|replace('**','')|safe }}</div>{% endfor %}
+    </div>
+  {% else %}
+    <div class="card miss">
+    <h2 style="border:0;margin-top:0">名古屋市の範囲外です</h2>
+    <p>{{ result.address }}</p>
+    {% for n in result.notes %}<div class="note">{{ n|replace('**','')|safe }}</div>{% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
+<h2>活断層マップとは別のものです</h2>
+<div class="card">
+<table>
+  <tr><th>活断層マップ</th><td>活断層の線の<b>直上か、何メートル離れているか</b>。<b>震源</b>の話です。</td></tr>
+  <tr><th>このサイト</th><td>その場所が<b>何震度になり、液状化するか</b>。<b>揺れの結果</b>の話です。</td></tr>
+</table>
+<p class="muted">名古屋市内のほぼ全域が震度6弱以上の想定です（震度6弱 51.5%・6強 46.4%・震度7 1.3%）。
+市の西部・南部は沖積低地で液状化の危険度が高く、東部の台地は液状化の判定対象外になっています。</p>
+</div>
+
+<h2>よくある質問</h2>
+<div class="card">
+{% for q_, a_ in faq %}
+  <p style="margin:0 0 4px"><b>{{ q_ }}</b></p>
+  <p class="muted" style="margin:0 0 16px">{{ a_ }}</p>
+{% endfor %}
+</div>
+{% endblock %}

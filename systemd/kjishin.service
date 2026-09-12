@@ -1,0 +1,16 @@
+[Unit]
+Description=Kurage 地震ハザードマップ（名古屋版） (kjishin) :18353
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/kojima/work/kjishin
+Environment=KJISHIN_PORT=18353
+EnvironmentFile=-/home/kojima/work/kjishin/.env
+ExecStart=/home/kojima/work/kjishin/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 18353
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

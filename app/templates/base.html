@@ -1,0 +1,55 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{ site }}{% endblock %}</title>
+<meta name="description" content="{% block desc %}住所や地番を入れると、南海トラフ地震（最大クラス）で想定される震度と液状化の危険度を調べます。名古屋市の公開データにもとづき、地番なら土地の区画の形で判定します。{% endblock %}">
+<link rel="canonical" href="{{ canonical }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site }}">
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ self.desc() }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:image" content="{{ public_base }}/static/ogp.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{{ jsonld|safe }}</script>
+{% block head %}{% endblock %}
+<style>
+:root{--ink:#12202f;--muted:#5a6a7a;--line:#d9e4e8;--teal:#0a9a8f;--teal-deep:#087064;--paper:#f7fbfa;--warn:#c0392b;--warn-bg:#fdecea;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.8}
+header{background:#fff;border-bottom:1px solid var(--line)}
+.bar{max-width:900px;margin:0 auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-weight:800;color:var(--ink);text-decoration:none;font-size:16px}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--muted)}
+nav a{color:var(--teal-deep);text-decoration:none;font-size:13.5px;margin-left:14px}
+main{max-width:900px;margin:0 auto;padding:26px 20px 60px}
+h1{font-size:clamp(20px,3.4vw,27px);line-height:1.4;margin:0 0 10px}
+h2{font-size:17px;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 4px 16px rgba(20,38,50,.05)}
+form.search{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:min(100%,240px);padding:12px 14px;border:1px solid var(--line);border-radius:9px;font-size:15px}
+button{padding:12px 22px;border:0;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+.hit{border-left:5px solid var(--warn);background:var(--warn-bg)}
+.miss{border-left:5px solid var(--teal)}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#eef6f5;width:34%;white-space:nowrap}
+.note{background:#fff8e8;border:1px solid #ecd8a7;border-radius:9px;padding:12px 14px;font-size:13.5px;margin:10px 0}
+.muted{color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:18px 20px;color:var(--muted);font-size:12.5px;max-width:900px;margin-left:auto;margin-right:auto}
+footer a{color:var(--teal-deep)}
+@media(max-width:560px){th{width:40%;white-space:normal}}
+</style></head><body>
+<header><div class="bar">
+<a class="brand" href="{{ root if root else './' }}">{{ site }}<small>EXBRIDGE, INC.</small></a>
+<nav><a href="{{ root if root else './' }}">住所・地番で調べる</a><a href="{{ root }}about">このデータについて</a></nav>
+</div></header>
+<main>{% block body %}{% endblock %}</main>
+<footer>
+{{ attribution }}／{{ chiban_attribution }}<br>
+収録 {{ "{:,}".format(count) }}メッシュ（約50m）・{{ "{:,}".format(chiban_count) }}筆。対象は<b>名古屋市内のみ</b>。{{ vintage }}<br>
+これは<b>予測</b>であって、実際にこの震度になると決まっているわけではありません。公的な証明ではありません。<br>
+地番参考図は名古屋市が「求積および権利関係等の確認の根拠となるものではない」と明記しています（{{ chiban_vintage }}）。<br>
+&copy; {{ year }} <a href="https://exbridge.jp/" target="_blank" rel="noopener">株式会社エクスブリッジ</a><br>
+<a href="{{ root }}about">このデータについて</a> ・ <a href="{{ root }}llms.txt">llms.txt</a> ・ <a href="{{ root }}api/check?q=中村区名駅一丁目1015-14">API</a> ・ <a href="{{ links.kfault }}" target="_blank" rel="noopener">活断層マップ</a> ・ <a href="{{ links.kflood }}" target="_blank" rel="noopener">洪水・内水ハザードマップ</a> ・ <a href="https://kurage.exbridge.jp/" target="_blank" rel="noopener">Kurage</a>
+</footer></body></html>

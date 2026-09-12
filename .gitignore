@@ -1,0 +1,7 @@
+.venv/
+data/*.sqlite
+data/*.sqlite-*
+outputs/
+__pycache__/
+*.pyc
+.env
