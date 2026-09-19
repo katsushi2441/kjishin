@@ -1,0 +1,284 @@
+{
+ "wards": {
+  "chikusa": {
+   "name": "千種区",
+   "slug": "chikusa",
+   "meshes": 5715,
+   "parcels": 51523,
+   "shindo": {
+    "震度6弱": 5468,
+    "震度6強": 247
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 3052,
+   "liq_unjudged": 2663,
+   "pl_max": 49.6,
+   "pl_avg": 8.2,
+   "settle_max_m": 0.38
+  },
+  "higashi": {
+   "name": "東区",
+   "slug": "higashi",
+   "meshes": 2495,
+   "parcels": 19678,
+   "shindo": {
+    "震度6弱": 1679,
+    "震度6強": 816
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 2459,
+   "liq_unjudged": 36,
+   "pl_max": 44.1,
+   "pl_avg": 10.0,
+   "settle_max_m": 0.16
+  },
+  "kita": {
+   "name": "北区",
+   "slug": "kita",
+   "meshes": 6102,
+   "parcels": 66125,
+   "shindo": {
+    "震度6弱": 4603,
+    "震度6強": 1499
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 5554,
+   "liq_unjudged": 548,
+   "pl_max": 56.8,
+   "pl_avg": 8.1,
+   "settle_max_m": 0.19
+  },
+  "nishi": {
+   "name": "西区",
+   "slug": "nishi",
+   "meshes": 6416,
+   "parcels": 64758,
+   "shindo": {
+    "震度6強": 3315,
+    "震度6弱": 3101
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6強",
+   "liq_judged": 6392,
+   "liq_unjudged": 24,
+   "pl_max": 62.6,
+   "pl_avg": 26.5,
+   "settle_max_m": 0.3
+  },
+  "nakamura": {
+   "name": "中村区",
+   "slug": "nakamura",
+   "meshes": 5823,
+   "parcels": 67573,
+   "shindo": {
+    "震度6強": 5698,
+    "震度6弱": 103,
+    "震度7": 22
+   },
+   "shindo_max": "震度7",
+   "shindo_mode": "震度6強",
+   "liq_judged": 5807,
+   "liq_unjudged": 16,
+   "pl_max": 73.5,
+   "pl_avg": 35.8,
+   "settle_max_m": 0.46
+  },
+  "naka": {
+   "name": "中区",
+   "slug": "naka",
+   "meshes": 3078,
+   "parcels": 24418,
+   "shindo": {
+    "震度6弱": 2497,
+    "震度6強": 581
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 3078,
+   "liq_unjudged": 0,
+   "pl_max": 52.0,
+   "pl_avg": 14.4,
+   "settle_max_m": 0.29
+  },
+  "showa": {
+   "name": "昭和区",
+   "slug": "showa",
+   "meshes": 3977,
+   "parcels": 37379,
+   "shindo": {
+    "震度6弱": 3702,
+    "震度6強": 270,
+    "震度5強": 5
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 2670,
+   "liq_unjudged": 1307,
+   "pl_max": 46.5,
+   "pl_avg": 11.3,
+   "settle_max_m": 0.19
+  },
+  "mizuho": {
+   "name": "瑞穂区",
+   "slug": "mizuho",
+   "meshes": 4069,
+   "parcels": 42809,
+   "shindo": {
+    "震度6弱": 2355,
+    "震度6強": 1714
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 2892,
+   "liq_unjudged": 1177,
+   "pl_max": 59.5,
+   "pl_avg": 10.9,
+   "settle_max_m": 0.35
+  },
+  "atsuta": {
+   "name": "熱田区",
+   "slug": "atsuta",
+   "meshes": 2568,
+   "parcels": 23884,
+   "shindo": {
+    "震度6強": 1929,
+    "震度6弱": 639
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6強",
+   "liq_judged": 2568,
+   "liq_unjudged": 0,
+   "pl_max": 59.5,
+   "pl_avg": 18.0,
+   "settle_max_m": 0.3
+  },
+  "nakagawa": {
+   "name": "中川区",
+   "slug": "nakagawa",
+   "meshes": 11462,
+   "parcels": 114211,
+   "shindo": {
+    "震度6強": 11246,
+    "震度6弱": 215,
+    "震度7": 1
+   },
+   "shindo_max": "震度7",
+   "shindo_mode": "震度6強",
+   "liq_judged": 11429,
+   "liq_unjudged": 33,
+   "pl_max": 72.6,
+   "pl_avg": 37.7,
+   "settle_max_m": 0.37
+  },
+  "minato": {
+   "name": "港区",
+   "slug": "minato",
+   "meshes": 10906,
+   "parcels": 76571,
+   "shindo": {
+    "震度6強": 10667,
+    "震度7": 238,
+    "震度6弱": 1
+   },
+   "shindo_max": "震度7",
+   "shindo_mode": "震度6強",
+   "liq_judged": 10859,
+   "liq_unjudged": 47,
+   "pl_max": 75.5,
+   "pl_avg": 38.3,
+   "settle_max_m": 0.42
+  },
+  "minami": {
+   "name": "南区",
+   "slug": "minami",
+   "meshes": 6135,
+   "parcels": 66497,
+   "shindo": {
+    "震度6強": 5690,
+    "震度6弱": 248,
+    "震度7": 197
+   },
+   "shindo_max": "震度7",
+   "shindo_mode": "震度6強",
+   "liq_judged": 6070,
+   "liq_unjudged": 65,
+   "pl_max": 77.0,
+   "pl_avg": 16.9,
+   "settle_max_m": 0.38
+  },
+  "moriyama": {
+   "name": "守山区",
+   "slug": "moriyama",
+   "meshes": 10322,
+   "parcels": 93281,
+   "shindo": {
+    "震度6弱": 9648,
+    "震度5強": 588,
+    "震度6強": 67,
+    "震度5弱": 19
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 6717,
+   "liq_unjudged": 3605,
+   "pl_max": 43.5,
+   "pl_avg": 2.5,
+   "settle_max_m": 0.24
+  },
+  "midori": {
+   "name": "緑区",
+   "slug": "midori",
+   "meshes": 13291,
+   "parcels": 126849,
+   "shindo": {
+    "震度6弱": 9296,
+    "震度6強": 3971,
+    "震度7": 24
+   },
+   "shindo_max": "震度7",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 3589,
+   "liq_unjudged": 9702,
+   "pl_max": 72.9,
+   "pl_avg": 14.9,
+   "settle_max_m": 0.44
+  },
+  "meito": {
+   "name": "名東区",
+   "slug": "meito",
+   "meshes": 6494,
+   "parcels": 49549,
+   "shindo": {
+    "震度6弱": 6461,
+    "震度6強": 33
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 1840,
+   "liq_unjudged": 4654,
+   "pl_max": 42.6,
+   "pl_avg": 4.6,
+   "settle_max_m": 0.21
+  },
+  "tempaku": {
+   "name": "天白区",
+   "slug": "tempaku",
+   "meshes": 7488,
+   "parcels": 57072,
+   "shindo": {
+    "震度6弱": 6964,
+    "震度6強": 524
+   },
+   "shindo_max": "震度6強",
+   "shindo_mode": "震度6弱",
+   "liq_judged": 3175,
+   "liq_unjudged": 4313,
+   "pl_max": 56.6,
+   "pl_avg": 7.2,
+   "settle_max_m": 0.45
+  }
+ }
+}

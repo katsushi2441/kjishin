@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}区から見る（名古屋市16区の想定震度と液状化）｜{{ site }}{% endblock %}
+{% block desc %}名古屋市16区それぞれに南海トラフ地震（最大クラス）で想定される震度と液状化の危険度を、約50mメッシュの集計で並べます。区を選ぶと、その区の内訳が出ます。{% endblock %}
+{% block body %}
+<nav class="bc"><a href="{{ root }}">調べる</a> › 区から見る</nav>
+<h1>区から見る</h1>
+<p class="lead">名古屋市16区それぞれに想定される揺れと液状化です。<b>震度7が想定されるのは{{ n7 }}区</b>。ただし<b>同じ区の中でも場所によって大きく違います</b>ので、実際の判定は住所か地番でお調べください。</p>
+<div class="scroll">
+<table class="tbl">
+  <tr><th>区</th><th>最も強い想定</th><th>最も多い想定</th><th>PL値の最大</th><th>判定対象外</th><th>メッシュ</th></tr>
+  {% for w in wards %}
+  <tr><td><a href="{{ root }}ku/{{ w.slug }}/">{{ w.name }}</a></td>
+      <td>{{ w.shindo_max }}</td><td>{{ w.shindo_mode }}</td>
+      <td>{{ w.pl_max if w.pl_max is not none else '—' }}</td>
+      <td>{{ "{:,}".format(w.liq_unjudged) }}</td>
+      <td>{{ "{:,}".format(w.meshes) }}</td></tr>
+  {% endfor %}
+</table>
+</div>
+<p class="note"><b>PL値</b>は液状化のしやすさの指標で、15を超えると危険度が高いとされます。<b>「判定対象外」は「液状化しない」という意味ではありません</b>——判定の対象に入っていないという意味で、名古屋市東部の台地に多く出ます。危険度なし（PL＝0）とは分けて数えています。</p>
+<p class="note">区ごとの数字は、地番参考図の筆の位置から各メッシュを区に割り当てて集計した実測値です。出典・時点は <a href="{{ root }}about">このデータについて</a> をご覧ください。</p>
+{% endblock %}

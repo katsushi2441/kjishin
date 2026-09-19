@@ -20,7 +20,7 @@ import os
 from datetime import date
 
 import requests
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -148,6 +148,45 @@ def _judge(q: str):
     return INDEX.check(lat, lon, title), ""
 
 
+# --- 区から見る -------------------------------------------------------------
+# 住所を1件ずつ調べる入口しか無かった。kflood は区ページを持っていて
+# 「名古屋市北区 ハザードマップ 洪水」で9〜13位・90日で表示375を得ている
+# （2026-09-19 実測）。同じ粒度を用意する。中身は scripts/build_ward_stats.py が
+# 地番参考図からメッシュを区に割り当てて作る（推測は入れない）。
+def _load_wards():
+    f = os.path.join(ROOT, "data", "ward_stats.json")
+    if not os.path.exists(f):
+        print("ward_stats.json がありません（区ページは出しません）")
+        return {}
+    with open(f, encoding="utf-8") as fh:
+        return json.load(fh).get("wards", {})
+
+
+WARDS = _load_wards()
+# 表示の順は名古屋市の区の並び
+WARD_ORDER = ["chikusa", "higashi", "kita", "nishi", "nakamura", "naka", "showa",
+              "mizuho", "atsuta", "nakagawa", "minato", "minami", "moriyama",
+              "midori", "meito", "tempaku"]
+WARD_LIST = [WARDS[k] for k in WARD_ORDER if k in WARDS]
+
+
+@app.get("/ku/", response_class=HTMLResponse)
+def wards_page(request: Request):
+    if not WARD_LIST:
+        raise HTTPException(404, "区のページはありません")
+    n7 = sum(1 for w in WARD_LIST if w["shindo_max"] == "震度7")
+    return page(request, "wards.html", wards=WARD_LIST, n7=n7)
+
+
+@app.get("/ku/{slug}/", response_class=HTMLResponse)
+def ward_page(request: Request, slug: str):
+    w = WARDS.get(slug)
+    if not w:
+        raise HTTPException(404, "その区のページはありません")
+    return page(request, "ward.html", w=w,
+                others=[x for x in WARD_LIST if x["slug"] != slug])
+
+
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, q: str = ""):
     result, error = None, ""
@@ -250,8 +289,10 @@ def robots():
 
 @app.get("/sitemap.xml")
 def sitemap():
+    paths = ["/", "/map/", "/about"] + (["/ku/"] if WARD_LIST else []) \
+        + [f"/ku/{w['slug']}/" for w in WARD_LIST]
     urls = "".join(f"<url><loc>{PUBLIC_BASE}{p}</loc><changefreq>monthly</changefreq></url>"
-                   for p in ("/", "/map/", "/about"))
+                   for p in paths)
     return Response(content=f'<?xml version="1.0" encoding="UTF-8"?>'
                             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
                     media_type="application/xml")

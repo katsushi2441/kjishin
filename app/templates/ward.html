@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}名古屋市{{ w.name }}の地震ハザード｜想定震度と液状化の危険度｜{{ site }}{% endblock %}
+{% block desc %}名古屋市{{ w.name }}で南海トラフ地震（最大クラス）に想定される震度と液状化の危険度。約50mメッシュ{{ "{:,}".format(w.meshes) }}件を集計し、最大{{ w.shindo_max }}・最も多いのは{{ w.shindo_mode }}。住所を入れればその地点で判定します。{% endblock %}
+{% block body %}
+<nav class="bc"><a href="{{ root }}">調べる</a> › <a href="{{ root }}ku/">区から見る</a> › {{ w.name }}</nav>
+<h1>名古屋市{{ w.name }}の地震ハザード</h1>
+<p class="lead">南海トラフ地震（最大クラス）で、{{ w.name }}に想定される揺れと液状化です。約50mメッシュ<b>{{ "{:,}".format(w.meshes) }}件</b>を集計しました。<b>同じ区の中でも場所によって違います</b>ので、実際の判定は住所か地番でお調べください。</p>
+
+<div class="card">
+  <form action="{{ root }}" method="get">
+    <input type="search" name="q" placeholder="例: 名古屋市{{ w.name }}◯◯1-1-1" autocomplete="off">
+    <button type="submit">この区の住所で調べる</button>
+  </form>
+</div>
+
+<h2>この区に想定される揺れ</h2>
+<div class="card">
+<table>
+  <tr><th>最も強い想定</th><td><b>{{ w.shindo_max }}</b></td></tr>
+  <tr><th>最も多い想定</th><td><b>{{ w.shindo_mode }}</b></td></tr>
+</table>
+</div>
+<div class="scroll">
+<table class="tbl">
+  <tr><th>震度</th><th>メッシュ数</th><th>割合</th></tr>
+  {% for k, v in w.shindo.items() %}
+  <tr><td>{{ k }}</td><td>{{ "{:,}".format(v) }}</td><td>{{ "%.1f"|format(v / w.meshes * 100) }}%</td></tr>
+  {% endfor %}
+</table>
+</div>
+
+<h2>液状化</h2>
+<div class="card">
+<table>
+  {% if w.pl_max is not none %}
+  <tr><th>PL値の最大</th><td><b>{{ w.pl_max }}</b>（15を超えると危険度が高いとされます）</td></tr>
+  <tr><th>PL値の平均</th><td>{{ w.pl_avg }}</td></tr>
+  {% if w.settle_max_m %}<tr><th>想定沈下量の最大</th><td>{{ w.settle_max_m }} m</td></tr>{% endif %}
+  <tr><th>判定の対象</th><td>{{ "{:,}".format(w.liq_judged) }}メッシュ</td></tr>
+  {% endif %}
+  <tr><th>判定対象外</th><td><b>{{ "{:,}".format(w.liq_unjudged) }}メッシュ</b>{% if w.meshes %}（{{ "%.0f"|format(w.liq_unjudged / w.meshes * 100) }}%）{% endif %}</td></tr>
+</table>
+</div>
+<p class="note"><b>「判定対象外」は「液状化しない」という意味ではありません。</b>液状化の判定の対象に入っていない、という意味です。名古屋市東部の台地に多く、危険度なし（PL＝0）とはまったく別の状態です。このサイトは両者を必ず分けて表示します。</p>
+
+<h2>ほかの区</h2>
+<div class="scroll">
+<table class="tbl">
+  <tr><th>区</th><th>最も強い想定</th><th>最も多い想定</th><th>PL値の最大</th><th>判定対象外</th></tr>
+  {% for o in others %}
+  <tr><td><a href="{{ root }}ku/{{ o.slug }}/">{{ o.name }}</a></td><td>{{ o.shindo_max }}</td><td>{{ o.shindo_mode }}</td><td>{{ o.pl_max if o.pl_max is not none else '—' }}</td><td>{{ "{:,}".format(o.liq_unjudged) }}</td></tr>
+  {% endfor %}
+</table>
+</div>
+
+<h2>あわせて確認したい方へ</h2>
+<p class="note">{{ w.name }}の洪水・内水は <a href="/kflood.php/nagoya/{{ w.slug }}/">洪水・内水ハザードマップ</a>、避難所は <a href="/krefuge.php/area/aichi-nagoya/{{ w.slug }}/">避難所マップ</a>、活断層の位置は <a href="/kfault.php/">活断層マップ</a> で調べられます。<b>この画面は揺れの結果</b>で、活断層マップは<b>震源</b>の話です。</p>
+
+<p class="note">区ごとの数字は、地番参考図の筆の位置から各メッシュを区に割り当てて集計した実測値です。推測は入れていません。出典・時点は <a href="{{ root }}about">このデータについて</a> をご覧ください。</p>
+{% endblock %}
