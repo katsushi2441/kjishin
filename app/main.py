@@ -287,11 +287,27 @@ def robots():
     return f"User-agent: *\nAllow: /\n\nSitemap: {PUBLIC_BASE}/sitemap.xml\n"
 
 
+
+def _lastmod():
+    """サイトマップの lastmod。**このファイルの更新日**を使う。
+
+    ページの中身が変わるのはコードかデータが変わったときなので、毎回 now を入れない
+    （「いつも更新されている」ことになって、かえって無視される）。
+    2026-09-22 実測: Google が取りに来ていた子サイトマップは lastmod のあるものだけだった。
+    """
+    import datetime as _d
+    import os as _o
+    return _d.datetime.fromtimestamp(_o.path.getmtime(_o.path.abspath(__file__))).strftime("%Y-%m-%d")
+
+
+_LASTMOD = _lastmod()
+
+
 @app.get("/sitemap.xml")
 def sitemap():
     paths = ["/", "/map/", "/about"] + (["/ku/"] if WARD_LIST else []) \
         + [f"/ku/{w['slug']}/" for w in WARD_LIST]
-    urls = "".join(f"<url><loc>{PUBLIC_BASE}{p}</loc><changefreq>monthly</changefreq></url>"
+    urls = "".join(f"<url><loc>{PUBLIC_BASE}{p}</loc><lastmod>{_LASTMOD}</lastmod><changefreq>monthly</changefreq></url>"
                    for p in paths)
     return Response(content=f'<?xml version="1.0" encoding="UTF-8"?>'
                             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
