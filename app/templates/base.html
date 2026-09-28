@@ -47,6 +47,7 @@ footer a{color:var(--teal-deep)}
 <a class="brand" href="{{ root if root else './' }}">{{ site }}<small>EXBRIDGE, INC.</small></a>
 <nav><a href="{{ root if root else './' }}">住所・地番で調べる</a><a href="{{ root }}map/">地図で見る</a><a href="{{ root }}about">このデータについて</a></nav>
 </div></header>
+<div style="padding:0 16px"><!--kurage-only--><div style="max-width:1000px;margin:12px auto 14px;background:#eef6fb;border:1px solid #bcd9ec;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.7;color:#16232e;box-sizing:border-box"><b>台風・大雨のときは、いま逃げた方がいい？</b> 住所か現在地で、警報・キキクル・台風の進路・川・津波・避難情報をまとめて答えます。 <a href="https://kurage.exbridge.jp/kbousai.php/?ref=kjishin-top" style="font-weight:700;color:#0b5d8f">Kurage 防災AIチャットで聞く →</a></div><!--/kurage-only--></div>
 <main>{% block body %}{% endblock %}</main>
 <footer>
 {{ attribution }}／{{ chiban_attribution }}<br>
